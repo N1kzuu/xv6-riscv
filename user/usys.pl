@@ -36,3 +36,4 @@ entry("getppid");
 entry("sbrk");
 entry("sleep");
 entry("uptime");
+entry("getancestor");

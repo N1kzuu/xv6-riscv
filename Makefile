@@ -135,6 +135,7 @@ UPROGS=\
 	$U/_zombie\
 	$U/_getppid\
 	$U/_generacion\
+	$U/_set_priority\
 	$U/_test\
 
 fs.img: mkfs/mkfs README $(UPROGS)

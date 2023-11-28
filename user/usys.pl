@@ -37,5 +37,6 @@ entry("sbrk");
 entry("sleep");
 entry("uptime");
 entry("getancestor");
+entry("set_priority");
 entry("mprotect");
 entry("munprotect");

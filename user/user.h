@@ -23,6 +23,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int getancestor(int);
+int set_priority(int, int);
 int mprotect(void*, int);
 int munprotect(void*, int);
 

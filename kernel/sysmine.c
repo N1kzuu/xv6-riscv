@@ -6,28 +6,24 @@
 #include "spinlock.h"
 #include "proc.h"
 
-int getancestor(int gen) {
-  struct proc *p = myproc();
-  int pid = p->pid;
-  int counter = 0;
+#include <stdint.h>
 
-  while (p != 0 && counter < gen ) {
-    p = p->parent;
-    counter += 1;
-  }
+uint64 sys_mprotect(void){
+    int addr;
+    int len;
+    argint(0, &addr);
+    argint(1, &len);
 
-  if (p != 0) {
-    pid = p->pid;
-  } else {
-    pid = -1;
-  }
-  return pid;
+    uintptr_t addr_ptr = (uintptr_t)addr;
+    return mprotect((void*) addr_ptr, len);
 }
 
-uint64
-sys_getancestor(void)
-{
-  int gen;
-  argint(0, &gen);
-  return getancestor(gen);
+uint64 sys_munprotect(void){
+    int addr;
+    int len;
+    argint(0, &addr);
+    argint(1, &len);
+
+    uintptr_t addr_ptr = (uintptr_t)addr;
+    return munprotect((void*) addr_ptr, len);
 }

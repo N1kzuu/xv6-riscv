@@ -5,6 +5,10 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h"
+#include "proc.h"
+#include <stdint.h>
+
 
 /*
  * the kernel's page table.
@@ -436,4 +440,61 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+int
+mprotect(void *addr, int len){
+  struct proc *curproc = myproc();
+
+  if(len <= 0 || (uintptr_t)addr + len * PGSIZE > curproc->sz){
+    printf("\nWrong Len\n");
+    return -1;
+  }
+
+  if((uintptr_t)addr % PGSIZE != 0){
+    printf("\nWrong Addr\n");
+    return -1; 
+  }
+
+  pte_t *pte;
+  for (uintptr_t i = (uintptr_t) addr; i < (uintptr_t) addr + len * PGSIZE; i +=PGSIZE){
+    pte = walk(curproc->pagetable, i, 0);
+    if(pte && ((*pte & PTE_U) != 0) && ((*pte & 1) != 0)) {
+      *pte &= ~PTE_W; // Limpiar el bit de escritura
+      printf("\nPTE: 0x%p\n", pte);
+    } else {
+      return -1;
+    }
+  }
+  sfence_vma();
+
+  return 0;
+}
+
+int munprotect(void *addr, int len){
+  struct proc *curproc = myproc();
+
+  if(len <= 0 || (uintptr_t)addr + len * PGSIZE > curproc->sz){
+    printf("\nWrong Len\n");
+    return -1;
+  }
+
+  if((uintptr_t)addr % PGSIZE != 0){
+    printf("\nWrong Addr\n");
+    return -1; 
+  }
+
+  pte_t *pte;
+  for (uintptr_t i = (uintptr_t) addr; i < (uintptr_t) addr + len * PGSIZE; i +=PGSIZE){
+    pte = walk(curproc->pagetable, i, 0);
+    if(pte && ((*pte & PTE_U) != 0) && ((*pte & 1) != 0)) {
+      *pte |= PTE_W; // Limpiar el bit de escritura
+      printf("\nPTE: 0x%p\n", pte);
+    } else {
+      return -1;
+    }
+  }
+  sfence_vma();
+
+  return 0;
 }

@@ -136,7 +136,7 @@ UPROGS=\
 	$U/_getppid\
 	$U/_generacion\
 	$U/_set_priority\
-	$U/_test\
+	$U/_t3\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

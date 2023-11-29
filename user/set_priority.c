@@ -22,7 +22,8 @@ int main(int argc, char *argv[]){
             }
             exit(0);
         }
-       
+        wait(0);
+
     }
     exit(0);
 }

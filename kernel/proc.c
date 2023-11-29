@@ -451,46 +451,33 @@ scheduler(void)
   
   c->proc = 0;
   for(;;){
-    // Avoid deadlock by ensuring that devices can interrupt.
+    
     intr_on();
 
-    int high_priority = 0;
+    int high_priority = -1;
     struct proc *high_priority_proc = 0;
 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       
       if(p->state == RUNNABLE && p->priority > high_priority) {
-        // Choose the process RUNNABLE with the highest priority
+        
         high_priority_proc = p;
         high_priority = p->priority;
       }
       release(&p->lock);
     }
 
-    // If it found a process, then change tor the selected process
-    if(high_priority_proc != 0) {
-      acquire(&high_priority_proc->lock);
-      high_priority_proc->state = RUNNING;
-      c->proc = high_priority_proc;
-      swtch(&c->context, &high_priority_proc->context);
-      c->proc = 0; 
-      release(&high_priority_proc->lock);
-    }
-    // Actual
-    /*if(high_priority_proc != 0) {
+     if(high_priority_proc != 0){
       acquire(&high_priority_proc->lock);
       if(high_priority_proc->state == RUNNABLE){
         high_priority_proc->state = RUNNING;
         c->proc = high_priority_proc;
-        //Context switch
         swtch(&c->context, &high_priority_proc->context);
-        
-        c->proc = 0; 
+        c->proc = 0;
       }
-      // Release the highest process when finished
       release(&high_priority_proc->lock);
-    }*/
+    }
   }
 }
 // Switch to scheduler.  Must hold only p->lock
@@ -707,15 +694,15 @@ procdump(void)
 int 
 set_priority(int priority, int pid){
   struct proc *p;
-  //Check if the priority exist
+  
   for(p = proc; p < &proc[NPROC]; p++){
     acquire(&p->lock);
-    if(p->pid == pid){ //Si existe
+    if(p->pid == pid){ 
       p->priority = priority;
       release(&p->lock);
-      return 0; // Retorna éxito
+      return 0; 
     }
     release(&p->lock);
   }
-  return -1; // (PID doesn´t found)
+  return -1; 
 }

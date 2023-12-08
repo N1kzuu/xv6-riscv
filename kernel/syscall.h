@@ -24,3 +24,4 @@
 #define SYS_set_priority 23
 #define SYS_mprotect 24
 #define SYS_munprotect 25
+#define SYS_chmod  26

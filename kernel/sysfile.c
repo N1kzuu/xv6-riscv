@@ -309,7 +309,8 @@ sys_open(void)
   struct file *f;
   struct inode *ip;
   int n;
-
+  
+  
   argint(1, &omode);
   if((n = argstr(0, path, MAXPATH)) < 0)
     return -1;
@@ -334,6 +335,10 @@ sys_open(void)
       return -1;
     }
   }
+  int mode = ip->modoarchivo;
+  if ((omode == O_RDONLY && mode != 1) || (omode == O_WRONLY && mode != 2)) {
+    return -1; 
+  } 
 
   if(ip->type == T_DEVICE && (ip->major < 0 || ip->major >= NDEV)){
     iunlockput(ip);
@@ -359,15 +364,19 @@ sys_open(void)
   f->ip = ip;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+  
 
   if((omode & O_TRUNC) && ip->type == T_FILE){
     itrunc(ip);
   }
-
+  
   iunlock(ip);
   end_op();
 
+
   return fd;
+
+
 }
 
 uint64
@@ -503,3 +512,43 @@ sys_pipe(void)
   }
   return 0;
 }
+
+// Verifica si la ruta y el modo son válidos
+int validarEntradas(const char *ruta, int modo) {
+    return (ruta[0] == '\0' || modo < 0) ? -1 : 0;
+}
+
+
+int modificarModo(struct inode *inodo, int nuevoModo) {
+    ilock(inodo);
+    inodo->modoarchivo = nuevoModo;
+    iunlock(inodo);
+    return 1;
+}
+
+// Función principal para cambiar el modo del archivo
+uint64 sys_chmod(void) {
+    char ruta[MAXPATH];
+    int nuevoModo;
+
+    // Obtener la ruta del archivo y el nuevo modo desde los argumentos del sistema
+    argstr(0, ruta, MAXPATH);
+    argint(1, &nuevoModo);
+
+    // Verificar validez de la ruta y el modo
+    if (validarEntradas(ruta, nuevoModo) < 0) {
+        return -1; // Error: Ruta o modo inválidos
+    }
+
+    // Buscar el inodo del archivo usando la ruta
+    struct inode *inodoArchivo = namei(ruta);
+
+    // Comprobar si se encontró el archivo
+    if (!inodoArchivo) {
+        return -1; // Error: No se encontró el archivo
+    }
+
+    // Modificar el modo del inodo
+    return modificarModo(inodoArchivo, nuevoModo);
+}
+

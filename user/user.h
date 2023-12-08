@@ -26,7 +26,7 @@ int getancestor(int);
 int set_priority(int, int);
 int mprotect(void*, int);
 int munprotect(void*, int);
-
+int chmod(const char*, int);
 
 // ulib.c
 int stat(const char*, struct stat*);
